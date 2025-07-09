@@ -1,7 +1,6 @@
 // file: screen/user_screen.dart
 
 import 'package:api/cubit/user_cubit.dart';
-import 'package:api/repository/user_repository.dart';
 import 'package:api/screen/add_user_screen.dart';
 import 'package:api/screen/detail_screen.dart';
 import 'package:flutter/material.dart';
@@ -24,30 +23,7 @@ class _UserScreenState extends State<UserScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Daftar User'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.network_check),
-            onPressed: () async {
-              final repository = UserRepository();
-              print('[UI] Testing connection...');
-              await repository.testConnectionDetails();
-              final isConnected = await repository.testConnection();
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      isConnected ? 'Connection successful!' : 'Connection failed!',
-                    ),
-                    backgroundColor: isConnected ? Colors.green : Colors.red,
-                  ),
-                );
-              }
-            },
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Daftar User')),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () async {

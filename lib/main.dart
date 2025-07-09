@@ -1,11 +1,20 @@
 import 'package:api/cubit/user_cubit.dart';
+import 'package:api/firebase_options.dart';
 import 'package:api/screen/user_screen.dart';
 import 'package:api/service/notification_service.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
+  // Initialize notifications
   await NotificationService().init();
 
   runApp(const MyApp());

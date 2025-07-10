@@ -1,7 +1,10 @@
 import 'package:api/cubit/user_cubit.dart';
 import 'package:api/firebase_options.dart';
+import 'package:api/screen/login_screen.dart';
 import 'package:api/screen/user_screen.dart';
+import 'package:api/service/google_auth.dart';
 import 'package:api/service/notification_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -91,27 +94,43 @@ class MyApp extends StatelessWidget {
     return BlocProvider(
       create: (context) => UserCubit(),
       child: MaterialApp(
-        title: 'Flutter Demo',
+        title: 'User Management App',
         theme: ThemeData(
-          // This is the theme of your application.
-          //
-          // TRY THIS: Try running your application with "flutter run". You'll see
-          // the application has a purple toolbar. Then, without quitting the app,
-          // try changing the seedColor in the colorScheme below to Colors.green
-          // and then invoke "hot reload" (save your changes or press the "hot
-          // reload" button in a Flutter-supported IDE, or press "r" if you used
-          // the command line to start the app).
-          //
-          // Notice that the counter didn't reset back to zero; the application
-          // state is not lost during the reload. To reset the state, use hot
-          // restart instead.
-          //
-          // This works for code too, not just values: Most code changes can be
-          // tested with just a hot reload.
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
         ),
-        home: const UserScreen(),
+        home: const AuthWrapper(),
       ),
+    );
+  }
+}
+
+// Auth wrapper to handle authentication state
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        // Show loading while checking auth state
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+        
+        // If user is logged in, show UserScreen
+        if (snapshot.hasData && snapshot.data != null) {
+          return const UserScreen();
+        }
+        
+        // If user is not logged in, show LoginScreen
+        return const LoginScreen();
+      },
     );
   }
 }

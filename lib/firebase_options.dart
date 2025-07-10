@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -28,15 +25,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -50,19 +41,47 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAac4GkFULu5dO4ACYAJn4KU6PBtDfD_0c',
-    appId: '1:462389549650:android:a3a9a16b5f637431871d8b',
-    messagingSenderId: '462389549650',
-    projectId: 'my-api-project-23ae8',
-    storageBucket: 'my-api-project-23ae8.firebasestorage.app',
+    apiKey: 'AIzaSyDqXSy1-TdkfYe1rGEnDjuFnIS5ayKhJDs',
+    appId: '1:572157186402:android:fb3461668e9e0e5e8b5c3b',
+    messagingSenderId: '572157186402',
+    projectId: 'daftaruser-projectt',
+    storageBucket: 'daftaruser-projectt.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBSmoixdsiyXoHx0t6a_J8CvvXMF7m335c',
-    appId: '1:462389549650:ios:26836cf7f940c861871d8b',
-    messagingSenderId: '462389549650',
-    projectId: 'my-api-project-23ae8',
-    storageBucket: 'my-api-project-23ae8.firebasestorage.app',
+    apiKey: 'AIzaSyD2T1G97JRXKQ4lXw-8y8YaJuHdR4-Cdrk',
+    appId: '1:572157186402:ios:4c094393c050eabd8b5c3b',
+    messagingSenderId: '572157186402',
+    projectId: 'daftaruser-projectt',
+    storageBucket: 'daftaruser-projectt.firebasestorage.app',
     iosBundleId: 'com.example.api',
   );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyAUhr_MDIM_j0LPkSn69S5Bioa_r7jnhEw',
+    appId: '1:572157186402:web:b12167c68791fe5e8b5c3b',
+    messagingSenderId: '572157186402',
+    projectId: 'daftaruser-projectt',
+    authDomain: 'daftaruser-projectt.firebaseapp.com',
+    storageBucket: 'daftaruser-projectt.firebasestorage.app',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyD2T1G97JRXKQ4lXw-8y8YaJuHdR4-Cdrk',
+    appId: '1:572157186402:ios:4c094393c050eabd8b5c3b',
+    messagingSenderId: '572157186402',
+    projectId: 'daftaruser-projectt',
+    storageBucket: 'daftaruser-projectt.firebasestorage.app',
+    iosBundleId: 'com.example.api',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyAUhr_MDIM_j0LPkSn69S5Bioa_r7jnhEw',
+    appId: '1:572157186402:web:bafea94e83c826218b5c3b',
+    messagingSenderId: '572157186402',
+    projectId: 'daftaruser-projectt',
+    authDomain: 'daftaruser-projectt.firebaseapp.com',
+    storageBucket: 'daftaruser-projectt.firebasestorage.app',
+  );
+
 }

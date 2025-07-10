@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "572157186402",
-    "project_id": "daftaruser-projectt",
-    "storage_bucket": "daftaruser-projectt.firebasestorage.app"
+    "project_number": "462389549650",
+    "project_id": "my-api-project-23ae8",
+    "storage_bucket": "my-api-project-23ae8.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:572157186402:android:fb3461668e9e0e5e8b5c3b",
+        "mobilesdk_app_id": "1:462389549650:android:a3a9a16b5f637431871d8b",
         "android_client_info": {
           "package_name": "com.example.api"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDqXSy1-TdkfYe1rGEnDjuFnIS5ayKhJDs"
+          "current_key": "AIzaSyAac4GkFULu5dO4ACYAJn4KU6PBtDfD_0c"
         }
       ],
       "services": {

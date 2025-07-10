@@ -9,7 +9,7 @@ class NotificationService {
   Future<void> init() async {
     // Request notification permissions
     await _requestPermissions();
-    
+
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
     const DarwinInitializationSettings initializationSettingIOS =
@@ -46,14 +46,14 @@ class NotificationService {
           priority: Priority.high,
           playSound: true,
         );
-    
+
     const DarwinNotificationDetails iosNotificationDetails =
         DarwinNotificationDetails(
           presentAlert: true,
           presentBadge: true,
           presentSound: true,
         );
-    
+
     const NotificationDetails notificationDetails = NotificationDetails(
       android: androidNotificationDetails,
       iOS: iosNotificationDetails,

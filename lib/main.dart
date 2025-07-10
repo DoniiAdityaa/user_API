@@ -3,21 +3,83 @@ import 'package:api/firebase_options.dart';
 import 'package:api/screen/user_screen.dart';
 import 'package:api/service/notification_service.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+// Global instance for notification service
+final NotificationService notificationService = NotificationService();
+
+// Background message handler
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print('Handling a background message: ${message.messageId}');
+
+  // Show notification when app is in background
+  await notificationService.showNotification(
+    id: message.notification.hashCode,
+    title: message.notification?.title ?? 'New Message',
+    body: message.notification?.body ?? 'You have a new message',
+  );
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Set background message handler
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   // Initialize notifications
-  await NotificationService().init();
+  await notificationService.init();
+
+  // Setup Firebase messaging
+  await setupFirebaseMessaging();
+
+  // Subscribe to topic
+  await FirebaseMessaging.instance.subscribeToTopic('Test');
+
+  // Get FCM token
+  getfcmToken();
 
   runApp(const MyApp());
+}
+
+// Setup Firebase messaging for foreground and app state changes
+Future<void> setupFirebaseMessaging() async {
+  // Request permission for notifications
+  NotificationSettings settings = await FirebaseMessaging.instance
+      .requestPermission(
+        alert: true,
+        announcement: false,
+        badge: true,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: false,
+        sound: true,
+      );
+
+  print('User granted permission: ${settings.authorizationStatus}');
+
+  // Handle messages when app is in foreground
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print('Got a message whilst in the foreground!');
+    print('Message data: ${message.data}');
+
+    if (message.notification != null) {
+      print('Message also contained a notification: ${message.notification}');
+
+      // Show notification when app is in foreground
+      notificationService.showNotification(
+        id: message.notification.hashCode,
+        title: message.notification?.title ?? 'New Message',
+        body: message.notification?.body ?? 'You have a new message',
+      );
+    }
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -138,4 +200,9 @@ class _MyHomePageState extends State<MyHomePage> {
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+}
+
+void getfcmToken() async {
+  var token = await FirebaseMessaging.instance.getToken();
+  print("FCM Token: $token");
 }

@@ -32,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 color: Colors.deepPurple,
               ),
               const SizedBox(height: 24),
-              
+
               // Welcome Text
               const Text(
                 'Welcome!',
@@ -44,41 +44,41 @@ class _LoginScreenState extends State<LoginScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
-              
+
               const Text(
                 'Sign in to access your account',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 48),
-              
+
               // Google Sign In Button
               ElevatedButton.icon(
                 onPressed: _isLoading ? null : _signInWithGoogle,
-                icon: _isLoading 
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                icon:
+                    _isLoading
+                        ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                        : Image.asset(
+                          'assets/images/google_icon.png',
+                          width: 20,
+                          height: 20,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(
+                              Icons.login,
+                              size: 20,
+                              color: Colors.white,
+                            );
+                          },
                         ),
-                      )
-                    : Image.asset(
-                        'assets/images/google_icon.png',
-                        width: 20,
-                        height: 20,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(
-                            Icons.login,
-                            size: 20,
-                            color: Colors.white,
-                          );
-                        },
-                      ),
                 label: Text(
                   _isLoading ? 'Signing in...' : 'Sign in with Google',
                   style: const TextStyle(
@@ -96,16 +96,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   elevation: 2,
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Terms and Privacy (optional)
               const Text(
                 'By signing in, you agree to our Terms of Service and Privacy Policy',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -121,21 +118,26 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final UserCredential? userCredential = await _googleAuthService.signInWithGoogle();
-      
+      final UserCredential? userCredential =
+          await _googleAuthService.signInWithGoogle();
+
       if (userCredential != null && mounted) {
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Welcome, ${userCredential.user?.displayName ?? 'User'}!'),
+            content: Text(
+              'Welcome, ${userCredential.user?.displayName ?? 'User'}!',
+            ),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 2),
           ),
         );
-        
-        // No need to navigate manually - AuthWrapper will handle it
-        // The AuthWrapper listens to auth state changes and will automatically
-        // navigate to UserScreen when user is signed in
+
+        // Navigate to UserScreen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const UserScreen()),
+        );
       }
     } catch (e) {
       // Show error message

@@ -2,7 +2,6 @@ import 'package:api/cubit/user_cubit.dart';
 import 'package:api/firebase_options.dart';
 import 'package:api/screen/login_screen.dart';
 import 'package:api/screen/user_screen.dart';
-import 'package:api/service/google_auth.dart';
 import 'package:api/service/notification_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -94,6 +93,7 @@ class MyApp extends StatelessWidget {
     return BlocProvider(
       create: (context) => UserCubit(),
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'User Management App',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -117,17 +117,15 @@ class AuthWrapper extends StatelessWidget {
         // Show loading while checking auth state
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
-        
+
         // If user is logged in, show UserScreen
         if (snapshot.hasData && snapshot.data != null) {
           return const UserScreen();
         }
-        
+
         // If user is not logged in, show LoginScreen
         return const LoginScreen();
       },

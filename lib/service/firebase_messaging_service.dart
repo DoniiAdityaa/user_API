@@ -1,11 +1,12 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter/material.dart';
 
 class FirebaseMessagingService {
-  static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  static final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
-  
+  static final FirebaseMessaging _firebaseMessaging =
+      FirebaseMessaging.instance;
+  static final FlutterLocalNotificationsPlugin _localNotifications =
+      FlutterLocalNotificationsPlugin();
+
   static String? _fcmToken;
   static String get fcmToken => _fcmToken ?? '';
 
@@ -13,17 +14,20 @@ class FirebaseMessagingService {
   static Future<void> initialize() async {
     try {
       // Request notification permissions
-      NotificationSettings settings = await _firebaseMessaging.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-        carPlay: false,
-        criticalAlert: false,
-        provisional: false,
-        announcement: false,
-      );
+      NotificationSettings settings = await _firebaseMessaging
+          .requestPermission(
+            alert: true,
+            badge: true,
+            sound: true,
+            carPlay: false,
+            criticalAlert: false,
+            provisional: false,
+            announcement: false,
+          );
 
-      print('📱 Notification permission status: ${settings.authorizationStatus}');
+      print(
+        '📱 Notification permission status: ${settings.authorizationStatus}',
+      );
 
       // Get FCM token
       _fcmToken = await _firebaseMessaging.getToken();
@@ -33,7 +37,9 @@ class FirebaseMessagingService {
       await _initializeLocalNotifications();
 
       // Handle background messages
-      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+      FirebaseMessaging.onBackgroundMessage(
+        _firebaseMessagingBackgroundHandler,
+      );
 
       // Handle foreground messages
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -45,13 +51,18 @@ class FirebaseMessagingService {
 
       // Handle notification tap when app is in background
       FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-        print('📱 Notification opened from background: ${message.notification?.title}');
+        print(
+          '📱 Notification opened from background: ${message.notification?.title}',
+        );
       });
 
       // Handle notification tap when app is terminated
-      RemoteMessage? initialMessage = await _firebaseMessaging.getInitialMessage();
+      RemoteMessage? initialMessage =
+          await _firebaseMessaging.getInitialMessage();
       if (initialMessage != null) {
-        print('📱 Notification opened from terminated state: ${initialMessage.notification?.title}');
+        print(
+          '📱 Notification opened from terminated state: ${initialMessage.notification?.title}',
+        );
       }
 
       print('✅ Firebase Messaging initialized successfully');
@@ -64,7 +75,7 @@ class FirebaseMessagingService {
   static Future<void> _initializeLocalNotifications() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
-    
+
     const DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(
           requestAlertPermission: true,

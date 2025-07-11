@@ -87,4 +87,19 @@ class UserCubit extends Cubit<UserState> {
       emit(UserError(e.toString()));
     }
   }
+
+  Future<void> filterUsersByDate(DateTime selectedDate) async {
+    try {
+      emit(UserLoading());
+      final filteredUsers =
+          await _originalUsers.where((user) {
+            return user.createdAt.year == selectedDate.year &&
+                user.createdAt.month == selectedDate.month &&
+                user.createdAt.day == selectedDate.day;
+          }).toList();
+      emit(UserSukses(filteredUsers));
+    } catch (e) {
+      emit(UserError(e.toString()));
+    }
+  }
 }

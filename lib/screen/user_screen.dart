@@ -5,6 +5,7 @@ import 'package:api/screen/add_user_screen.dart';
 import 'package:api/screen/detail_screen.dart';
 import 'package:api/screen/login_screen.dart';
 import 'package:api/service/google_auth.dart';
+import 'package:api/widget/calender_botom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -17,6 +18,26 @@ class UserScreen extends StatefulWidget {
 
 class _UserScreenState extends State<UserScreen> {
   final GoogleAuthService _googleAuthService = GoogleAuthService();
+  DateTime _lastSelectedDate = DateTime.now();
+
+  void _showCalendarBottomSheet(BuildContext context) async {
+    final selectedDate = await showModalBottomSheet<DateTime>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return CalendarBotomSheet(initialDate: _lastSelectedDate);
+      },
+    );
+    if (selectedDate != null && mounted) {
+      setState(() {
+        _lastSelectedDate = selectedDate;
+      });
+      context.read<UserCubit>().filterUsersByDate(selectedDate);
+    }
+  }
 
   @override
   void initState() {
@@ -103,18 +124,38 @@ class _UserScreenState extends State<UserScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: TextField(
-              decoration: const InputDecoration(
-                hintText: "Cari nama pengguna...",
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    decoration: const InputDecoration(
+                      hintText: "Cari nama pengguna...",
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
+                    ),
+                    onChanged: (query) {
+                      context.read<UserCubit>().searchUsers(query);
+                    },
+                  ),
                 ),
-              ),
-              onChanged: (query) {
-                context.read<UserCubit>().searchUsers(query);
-              },
+                SizedBox(width: 8),
+                IconButton(
+                  onPressed: () {
+                    _showCalendarBottomSheet(context);
+                  },
+                  icon: const Icon(Icons.calendar_month_outlined),
+                ),
+                SizedBox(width: 8),
+                IconButton(
+                  onPressed: () {
+                    BlocProvider.of<UserCubit>(context).getUsers();
+                  },
+                  icon: Icon(Icons.refresh_sharp),
+                ),
+              ],
             ),
           ),
           Expanded(
@@ -235,7 +276,7 @@ class _UserScreenState extends State<UserScreen> {
   Future<void> _logout() async {
     try {
       await _googleAuthService.signOut();
-      
+
       // Navigate back to login screen and clear the navigation stack
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(

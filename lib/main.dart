@@ -8,6 +8,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:api/repository/user_repository.dart';
 
 // Global instance for notification service
 final NotificationService notificationService = NotificationService();
@@ -44,10 +45,12 @@ void main() async {
   // Subscribe to topic
   await FirebaseMessaging.instance.subscribeToTopic('Test');
 
+  final UserRepository userRepository = UserRepository();
+
   // Get FCM token
   getfcmToken();
 
-  runApp(const MyApp());
+  runApp(MyApp(userRepository: userRepository));
 }
 
 // Setup Firebase messaging for foreground and app state changes
@@ -85,13 +88,14 @@ Future<void> setupFirebaseMessaging() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final UserRepository userRepository;
+  const MyApp({super.key, required this.userRepository});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => UserCubit(),
+      create: (context) => UserCubit(userRepository)..getUsers(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'User Management App',

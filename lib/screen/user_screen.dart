@@ -202,9 +202,14 @@ class _UserScreenState extends State<UserScreen> {
                                           DetailScreen(userId: user.id),
                                 ),
                               );
-                              // Jika ada perubahan (edit/delete), muat ulang daftar
-                              if (result == true && context.mounted) {
-                                context.read<UserCubit>().getUsers();
+                              // Restore user list state when returning from detail
+                              if (context.mounted) {
+                                if (result == true) {
+                                  // If there were changes (edit/delete), reload the list
+                                  context.read<UserCubit>().getUsers();
+                                } else {
+                                  // If no changes, just restore the previous state
+                                }
                               }
                             },
                             child: ListTile(

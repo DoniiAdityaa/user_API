@@ -1,36 +1,41 @@
+// lib/cubit/user_state.dart
+
 part of 'user_cubit.dart';
 
-@immutable
 sealed class UserState {}
 
 final class UserInitial extends UserState {}
 
 final class UserLoading extends UserState {}
 
+// TIDAK BERUBAH
 final class UserSukses extends UserState {
   final List<UserModel> users;
-
   UserSukses(this.users);
 }
 
-final class UserDetailSukses extends UserState {
-  final UserModel user;
+// UserDetailSukses moved to separate UserDetailCubit
 
-  UserDetailSukses(this.user);
-}
-
+// TIDAK BERUBAH
 final class UserError extends UserState {
   final String message;
-
   UserError(this.message);
 }
 
+// DIUBAH DI SINI
 final class UserCreateSuccess extends UserState {
   final UserModel user;
-  UserCreateSuccess(this.user);
+  final String message; // <-- TAMBAHKAN INI
+
+  // Ubah constructor untuk menerima message
+  UserCreateSuccess({required this.user, required this.message});
 }
 
+// DIUBAH DI SINI
 final class UserUpdateSuccess extends UserState {
   final UserModel updatedUser;
-  UserUpdateSuccess(this.updatedUser);
+  final String message; // <-- TAMBAHKAN INI
+
+  // Ubah constructor untuk menerima message
+  UserUpdateSuccess({required this.updatedUser, required this.message});
 }

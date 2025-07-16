@@ -1,8 +1,6 @@
-// lib/service/database_service.dart
-
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import '../models/user_model.dart';
+import '../models/product_model.dart'; //
 
 class DatabaseService {
   static final DatabaseService instance = DatabaseService._init();
@@ -12,7 +10,7 @@ class DatabaseService {
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDB('users.db');
+    _database = await _initDB('app_database.db');
     return _database!;
   }
 
@@ -22,101 +20,60 @@ class DatabaseService {
     return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 
+  // Fungsi ini akan membuat tabel 'products' saat aplikasi diinstall pertama kali
   Future _createDB(Database db, int version) async {
     const idType = 'TEXT PRIMARY KEY';
     const textType = 'TEXT NOT NULL';
-    const boolType = 'INTEGER NOT NULL DEFAULT 0';
+    const integerType = 'INTEGER NOT NULL';
+
     await db.execute('''
-      CREATE TABLE users (
+      CREATE TABLE products (
         id $idType,
         name $textType,
-        avatar $textType,
-        address $textType,
-        createdAt $textType,
-        isLocalOnly $boolType,
-        needsSync $boolType,
-        syncAction $textType,
-        lastModified $textType
+        price $integerType
       )
     ''');
   }
 
-  // Create User
-  Future<void> createUser(UserModel user) async {
-    try {
-      final db = await instance.database;
-      print('[DB] Creating user: ${user.name} with ID: ${user.id}');
-      await db.insert(
-        'users',
-        user.toJson(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-      print('[DB] User created successfully in local database');
-    } catch (e) {
-      print('[DB] Error creating user: $e');
-      rethrow;
-    }
-  }
+  // --- FUNGSI CRUD UNTUK PRODUK ---
 
-  // Read User
-  Future<List<UserModel>> readAllUsers() async {
+  // CREATE Product
+  Future<void> createProduct(ProductModel product) async {
     final db = await instance.database;
-    final result = await db.query('users', orderBy: 'name ASC');
-    return result.map((json) => UserModel.fromJson(json)).toList();
-  }
-
-  // Read User by ID
-  Future<UserModel?> getUserById(String id) async {
-    final db = await instance.database;
-    final result = await db.query(
-      'users',
-      where: 'id = ?',
-      whereArgs: [id],
+    await db.insert(
+      'products',
+      product.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    
-    if (result.isEmpty) {
-      return null;
-    }
-    
-    return UserModel.fromJson(result.first);
   }
 
-  // Update User
-  Future<int> updateUser(UserModel user) async {
+  // READ All Products
+  Future<List<ProductModel>> readAllProducts() async {
+    final db = await instance.database;
+    final result = await db.query('products', orderBy: 'name ASC');
+    return result.map((json) => ProductModel.fromJson(json)).toList();
+  }
+
+  // UPDATE Product
+  Future<int> updateProduct(ProductModel product) async {
     final db = await instance.database;
     return db.update(
-      'users',
-      user.toJson(),
+      'products',
+      product.toJson(),
       where: 'id = ?',
-      whereArgs: [user.id],
+      whereArgs: [product.id],
     );
   }
 
-  // Delete User
-  Future<int> deleteUser(String id) async {
+  // DELETE Product
+  Future<int> deleteProduct(String id) async {
     final db = await instance.database;
-    return db.delete('users', where: 'id = ?', whereArgs: [id]);
+    return db.delete('products', where: 'id = ?', whereArgs: [id]);
   }
 
+  // Fungsi untuk menutup koneksi
   Future close() async {
     final db = await instance.database;
     db.close();
-  }
-
-  // Cache Users
-  Future<void> cacheAllUsers(List<UserModel> users) async {
-    final db = await instance.database;
-    final batch = db.batch();
-
-    // Clear existing users
-    batch.delete('users');
-
-    // Insert all users
-    for (var user in users) {
-      batch.insert('users', user.toJson());
-    }
-
-    // Commit all operations at once
-    await batch.commit(noResult: true);
   }
 }

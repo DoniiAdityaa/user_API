@@ -1,12 +1,10 @@
 import 'package:api/models/user_model.dart';
-import 'package:api/service/database_service.dart';
 import 'package:dio/dio.dart';
 
 class UserRepository {
   // Base URL dari mock API
   final String _baseUrl = "https://686b3968e559eba90871c627.mockapi.io/api/v1";
   late final Dio _dio;
-  final DatabaseService _databaseService = DatabaseService.instance;
 
   UserRepository() {
     _dio = Dio();
@@ -88,22 +86,33 @@ class UserRepository {
   // --- READ ALL ---
   Future<List<UserModel>> getUsers() async {
     try {
-      print('[DATA] Mencoba mengambil data dari API...');
       final response = await _dio.get("$_baseUrl/users");
-      final remoteUsers =
-          (response.data as List)
-              .map((json) => UserModel.fromJson(json))
-              .toList();
-
-      print(
-        '[DATA] Berhasil! Menyimpan ${remoteUsers.length} data ke DB lokal...',
-      );
-      await _databaseService.cacheAllUsers(remoteUsers);
-      return remoteUsers;
+      // Mapping dari List<dynamic> menjadi List<UserModel>
+      return (response.data as List)
+          .map((json) => UserModel.fromJson(json))
+          .toList();
     } catch (e) {
-      print('[DATA] Gagal mengambil dari API, mengambil dari DB lokal...');
-      final localUsers = await _databaseService.readAllUsers();
-      return localUsers;
+      if (e is DioException) {
+        switch (e.type) {
+          case DioExceptionType.connectionTimeout:
+            throw Exception(
+              'Connection timeout - please check your internet connection',
+            );
+          case DioExceptionType.receiveTimeout:
+            throw Exception(
+              'Receive timeout - server is taking too long to respond',
+            );
+          case DioExceptionType.connectionError:
+            throw Exception(
+              'Connection error - please check your internet connection',
+            );
+          case DioExceptionType.badResponse:
+            throw Exception('Server error: ${e.response?.statusCode}');
+          default:
+            throw Exception('Network error: ${e.message}');
+        }
+      }
+      throw Exception('Failed to retrieve user data: $e');
     }
   }
 
@@ -113,45 +122,25 @@ class UserRepository {
       final response = await _dio.get('$_baseUrl/users/$id');
       return UserModel.fromJson(response.data);
     } catch (e) {
-      print('Failed to get user by ID online, trying offline. Error: $e');
-
-      // Try to get from local database
-      final localUser = await _databaseService.getUserById(id);
-      if (localUser != null) {
-        return localUser;
-      }
-
       throw Exception('Gagal mengambil detail pengguna: $e');
     }
   }
 
-  // Create Users
   Future<UserModel> createUser(String name, String address) async {
-    final avatarUrl =
-        'https://i.pravatar.cc/150?u=${DateTime.now().millisecondsSinceEpoch}';
-    final data = {
-      'name': name,
-      'address': address,
-      'createdAt': DateTime.now().toIso8601String(),
-      'avatar': avatarUrl,
-    };
-
     try {
+      final data = {
+        'name': name,
+        'address': address,
+        'createdAt': DateTime.now().toIso8601String(),
+        'avatar':
+            'https://i.pravatar.cc/150?u=${DateTime.now().millisecondsSinceEpoch}',
+      };
+
       final response = await _dio.post('$_baseUrl/users', data: data);
-      final newUser = UserModel.fromJson(response.data);
-      await _databaseService.createUser(newUser);
-      return newUser;
+
+      return UserModel.fromJson(response.data);
     } catch (e) {
-      print('Failed to create user online, saving offline. Error: $e');
-      final offlineUser = UserModel(
-        id: DateTime.now().toIso8601String(), // Use timestamp as ID
-        name: name,
-        address: address,
-        createdAt: DateTime.now(),
-        avatar: avatarUrl,
-      );
-      await _databaseService.createUser(offlineUser);
-      return offlineUser;
+      throw Exception('Gagal membuat pengguna: $e');
     }
   }
 
@@ -164,38 +153,25 @@ class UserRepository {
       final data = {'name': newName, 'address': newAddress};
 
       final response = await _dio.put('$_baseUrl/users/$id', data: data);
-      final updatedUser = UserModel.fromJson(response.data);
-      await _databaseService.updateUser(updatedUser);
-      return updatedUser;
+
+      return UserModel.fromJson(response.data);
     } catch (e) {
-      print('Failed to update user online, updating offline. Error: $e');
-
-      // Get the existing user from local database
-      final localUsers = await _databaseService.readAllUsers();
-      final existingUser = localUsers.firstWhere((user) => user.id == id);
-
-      // Create updated user with new data
-      final offlineUpdatedUser = UserModel(
-        id: existingUser.id,
-        name: newName,
-        address: newAddress,
-        createdAt: existingUser.createdAt,
-        avatar: existingUser.avatar,
-      );
-
-      await _databaseService.updateUser(offlineUpdatedUser);
-      return offlineUpdatedUser;
+      throw Exception('Gagal memperbarui pengguna: $e');
     }
   }
 
   // --- DELETE ---
   Future<void> deleteUserById(String id) async {
     try {
-      await _dio.delete('$_baseUrl/users/$id');
-      await _databaseService.deleteUser(id);
+      // Mengirim request DELETE untuk menghapus data
+      final response = await _dio.delete('$_baseUrl/users/$id');
+
+      // Cek jika status code tidak sukses
+      if (response.statusCode != 200) {
+        throw Exception('Gagal menghapus pengguna.');
+      }
     } catch (e) {
-      print('Failed to delete user online, deleting offline. Error: $e');
-      await _databaseService.deleteUser(id);
+      throw Exception('Gagal menghapus pengguna: $e');
     }
   }
 }

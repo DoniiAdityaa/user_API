@@ -1,9 +1,12 @@
 // file: screen/user_screen.dart
 
+import 'package:api/cubit/product_cubit.dart';
 import 'package:api/cubit/user_cubit.dart';
+import 'package:api/repository/product_repository.dart';
 import 'package:api/screen/add_user_screen.dart';
 import 'package:api/screen/detail_screen.dart';
 import 'package:api/screen/login_screen.dart';
+import 'package:api/screen/product_screen.dart';
 import 'package:api/service/google_auth.dart';
 import 'package:api/widget/calender_botom_sheet.dart';
 import 'package:flutter/material.dart';
@@ -115,7 +118,6 @@ class _UserScreenState extends State<UserScreen> {
             context,
             MaterialPageRoute(builder: (context) => const AddUserScreen()),
           );
-          // Jika user baru berhasil dibuat, muat ulang daftar
           if (result == true && context.mounted) {
             context.read<UserCubit>().getUsers();
           }
@@ -140,6 +142,25 @@ class _UserScreenState extends State<UserScreen> {
                       context.read<UserCubit>().searchUsers(query);
                     },
                   ),
+                ),
+                SizedBox(width: 8),
+                IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (ctx) => BlocProvider(
+                              create:
+                                  (context) =>
+                                      ProductCubit(ProductRepository())
+                                        ..fetchProducts(),
+                              child: const ProductScreen(),
+                            ),
+                      ),
+                    );
+                  },
+                  icon: Icon(Icons.production_quantity_limits),
                 ),
                 SizedBox(width: 8),
                 IconButton(
@@ -202,14 +223,11 @@ class _UserScreenState extends State<UserScreen> {
                                           DetailScreen(userId: user.id),
                                 ),
                               );
-                              // Restore user list state when returning from detail
+
                               if (context.mounted) {
                                 if (result == true) {
-                                  // If there were changes (edit/delete), reload the list
                                   context.read<UserCubit>().getUsers();
-                                } else {
-                                  // If no changes, just restore the previous state
-                                }
+                                } else {}
                               }
                             },
                             child: ListTile(
